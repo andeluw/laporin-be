@@ -1,0 +1,71 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build output
+dist/
+build/
+lib-cov
+
+# Coverage and testing
+coverage/
+*.lcov
+.nyc_output/
+.eslintcache
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+
+# Prisma
+/prisma/migrations/dev.db
+/prisma/dev.db
+/prisma/.DS_Store
+/src/generated/prisma
+
+# Cache
+.cache/
+.parcel-cache
+.next/
+.nuxt/
+.vuepress/dist
+.serverless/
+.rpt2_cache/
+.rts2_cache_*/
+
+# VSCode and IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Output of 'npm pack'
+*.tgz
+
+# Docker / DB data
+data/
+*.sqlite
+
+# REPL
+.node_repl_history
