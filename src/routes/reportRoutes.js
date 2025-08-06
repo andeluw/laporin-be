@@ -59,4 +59,26 @@ router.get("/:reportId", async (req, res, next) => {
   }
 });
 
+// find a report by userPublicKey
+router.post("/lookup", async (req, res, next) => {
+  const { userPublicKey } = req.body;
+  if (!userPublicKey) {
+    return next(ApiError.badRequest("userPublicKey is required."));
+  }
+
+  try {
+    const report = await prisma.report.findFirst({
+      where: { userPublicKey },
+    });
+
+    if (!report) {
+      return next(ApiError.notFound("Report not found for the given key."));
+    }
+
+    res.status(200).json(apiResponse({ data: { reportId: report.id } }));
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
