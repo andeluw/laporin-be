@@ -13,6 +13,7 @@ model Report {
   id           String    @id @default(cuid())
   // Store the user's public key for the officer to retrieve
   userPublicKey String?
+  officerPublicKey String?
   details      String?   @default("No details provided")
   messages     Message[]
   createdAt    DateTime  @default(now())

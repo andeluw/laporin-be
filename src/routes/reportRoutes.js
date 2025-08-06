@@ -1,4 +1,4 @@
-// src/routes/reportRoutes.js
+// chowjustin/laporin-be/src/routes/reportRoutes.js
 
 const express = require("express");
 const router = express.Router();
@@ -43,7 +43,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// Get a single report's details, including the user's public key
+// Get a single report's details, including public keys
 router.get("/:reportId", async (req, res, next) => {
   const { reportId } = req.params;
   try {
@@ -54,6 +54,27 @@ router.get("/:reportId", async (req, res, next) => {
       return next(ApiError.notFound("Report not found."));
     }
     res.status(200).json(apiResponse({ data: report }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Assign an officer by saving their public key
+router.put("/:reportId/assign", async (req, res, next) => {
+  const { reportId } = req.params;
+  const { officerPublicKey } = req.body;
+  if (!officerPublicKey) {
+    return next(ApiError.badRequest("officerPublicKey is required."));
+  }
+
+  try {
+    const updatedReport = await prisma.report.update({
+      where: { id: reportId },
+      data: { officerPublicKey },
+    });
+    res
+      .status(200)
+      .json(apiResponse({ data: updatedReport, message: "Officer assigned." }));
   } catch (error) {
     next(error);
   }
