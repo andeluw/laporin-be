@@ -9,14 +9,22 @@ datasource db {
 }
 
 // !SETUP Add your models below.
-// This is an example model to help you get started with Prisma.
-// You can delete it and create your own models based on your app needs.
+model Report {
+  id           String    @id @default(cuid())
+  // Store the user's public key for the officer to retrieve
+  userPublicKey String?
+  officerPublicKey String?
+  details      String?   @default("No details provided")
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
 
-// model User {
-//   id        String   @id @default(cuid())
-//   email     String   @unique
-//   name      String?
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
+model Message {
+  id        String   @id @default(cuid())
+  report    Report   @relation(fields: [reportId], references: [id])
+  reportId  String
+  sender    String // "user" or "officer"
+  content   String // Encrypted message content
+  createdAt DateTime @default(now())
+}
