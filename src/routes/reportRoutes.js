@@ -9,6 +9,7 @@ const {
   getReportById,
   assignOfficer,
   getReportByPublicKey,
+  triggerAnalysisById,
 } = require("../controllers/reportController");
 
 router.post("/", createReport);
@@ -26,5 +27,6 @@ router.post(
   onlyAllow("OFFICER"),
   getReportByPublicKey
 );
+router.post("/:id/analyze", triggerAnalysisById);
 
 module.exports = router;

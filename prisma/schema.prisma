@@ -10,15 +10,23 @@ datasource db {
 }
 
 model Report {
-  id                 String    @id @default(cuid())
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
-  details            String?   @default("No details provided")
-  details_summary    String?   @default("No summary provided")
-  
+  id                  String    @id @default(cuid())
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  details             String
+
+  summary     String?       
+  category            CategoryEnum? 
+  urgency             UrgencyEnum?  
+  recommended_instance InstanceEnum? 
+
   user_public_key    String?
   officer_public_key String?
+
   messages           Message[]
+
+  handler_id             String?
+  handler               User?     @relation(fields: [handler_id], references: [id])
 }
 
 model Message {
@@ -37,6 +45,8 @@ model User {
   name       String
   instance   InstanceEnum
   role       RoleEnum      @default(OFFICER)
+
+  assigned_reports Report[]
 }
 
 enum RoleEnum {
@@ -63,4 +73,19 @@ enum InstanceEnum {
   /// Untuk rujukan bantuan hukum gratis atau pendampingan dari organisasi non-pemerintah.
   /// Merepresentasikan: Lembaga Bantuan Hukum & Organisasi Masyarakat Sipil.
   LBH_OMS
+}
+
+enum CategoryEnum {
+  KEKERASAN_DALAM_RUMAH_TANGGA
+  KEKERASAN_SEKSUAL
+  KEKERASAN_PADA_ANAK
+  PERDAGANGAN_ORANG
+  SIBER_KEKERASAN_BERBASIS_GENDER
+  KEKERASAN_LAINNYA
+}
+
+enum UrgencyEnum {
+  Kritis
+  Tinggi
+  Sedang
 }

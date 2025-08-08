@@ -1,6 +1,7 @@
 const prisma = require("../utils/prisma");
 const { apiResponse } = require("../utils/apiResponse");
 const ApiError = require("../utils/apiError");
+const { analyzeReport } = require("../services/aiAnalysisService");
 
 // Create a new report
 const createReport = async (req, res, next) => {
@@ -23,6 +24,10 @@ const createReport = async (req, res, next) => {
         message: "Report created successfully.",
       })
     );
+
+    analyzeReport(report.id).catch((err) => {
+      console.error(`Background analysis failed for report ${report.id}:`, err);
+    });
   } catch (error) {
     next(error);
   }
@@ -30,8 +35,10 @@ const createReport = async (req, res, next) => {
 
 // Get a list of all reports (for officer dashboard)
 const getAllReports = async (req, res, next) => {
+  const { instance } = req.user;
   try {
     const reports = await prisma.report.findMany({
+      where: { recommended_instance: instance },
       orderBy: { created_at: "desc" },
     });
     res.status(200).json(apiResponse({ data: reports }));
@@ -99,10 +106,35 @@ const getReportByPublicKey = async (req, res, next) => {
   }
 };
 
+const triggerAnalysisById = async (req, res, next) => {
+  const { id } = req.params;
+  if (!id) {
+    return next(ApiError.badRequest("ID Laporan tidak ditemukan."));
+  }
+
+  try {
+    console.log(`Triggering analysis for report ID: ${id}`);
+    const analysisResult = await analyzeReport(id);
+    if (!analysisResult) {
+      return next(ApiError.internal("Gagal menganalisis laporan."));
+    }
+
+    res.status(200).json(
+      apiResponse({
+        data: analysisResult,
+        message: "Analisis laporan berhasil.",
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createReport,
   getAllReports,
   getReportById,
   assignOfficer,
   getReportByPublicKey,
+  triggerAnalysisById,
 };
