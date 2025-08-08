@@ -4,27 +4,63 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// !SETUP Add your models below.
 model Report {
-  id           String    @id @default(cuid())
-  // Store the user's public key for the officer to retrieve
-  userPublicKey String?
-  officerPublicKey String?
-  details      String?   @default("No details provided")
-  messages     Message[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  details            String?   @default("No details provided")
+  details_summary    String?   @default("No summary provided")
+  
+  user_public_key    String?
+  officer_public_key String?
+  messages           Message[]
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  report    Report   @relation(fields: [reportId], references: [id])
-  reportId  String
-  sender    String // "user" or "officer"
-  content   String // Encrypted message content
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  report_id  String
+  sender     String
+  content    String
+  created_at DateTime @default(now())
+  report     Report   @relation(fields: [report_id], references: [id], map: "Message_reportId_fkey")
+}
+
+model User {
+  id         String        @id @default(cuid())
+  email      String        @unique
+  password   String
+  name       String
+  instance   InstanceEnum
+  role       RoleEnum      @default(OFFICER)
+}
+
+enum RoleEnum {
+  OFFICER
+}
+
+enum InstanceEnum {
+  /// Untuk kasus yang memerlukan penindakan hukum pidana.
+  /// Merepresentasikan: Unit PPA Polri.
+  POLRI_PPA
+
+  /// Untuk layanan korban yang komprehensif (konseling, rumah aman, pendampingan).
+  /// Merepresentasikan: UPTD PPA atau P2TP2A.
+  UPTD_PPA
+
+  /// Untuk isu sistemik atau advokasi kebijakan terkait kekerasan terhadap perempuan.
+  /// Merepresentasikan: Komisi Nasional Anti Kekerasan terhadap Perempuan.
+  KOMNAS_PEREMPUAN
+
+  /// Untuk semua isu yang berkaitan dengan perlindungan hak dan keselamatan anak.
+  /// Merepresentasikan: Komisi Perlindungan Anak Indonesia.
+  KPAI
+
+  /// Untuk rujukan bantuan hukum gratis atau pendampingan dari organisasi non-pemerintah.
+  /// Merepresentasikan: Lembaga Bantuan Hukum & Organisasi Masyarakat Sipil.
+  LBH_OMS
 }

@@ -1,21 +1,28 @@
-// app.js
-
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const errorMiddleware = require("../middlewares/errorMiddleware");
 const ApiError = require("../utils/apiError");
-const chatRoutes = require("../routes/chatRoutes");
-const reportRoutes = require("../routes/reportRoutes");
+const authRoutes = require("../routes/authRoutes.js");
+const chatRoutes = require("../routes/chatRoutes.js");
+const reportRoutes = require("../routes/reportRoutes.js");
 
 const app = express();
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",") ?? [
+  "http://localhost:3000",
+];
 
-// Core middlewares
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
-    credentials: true,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: false,
   })
 );
 app.use(morgan("dev"));
@@ -23,12 +30,6 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
-
-// !SETUP import your routes here
-const exampleRoutes = require("../routes/exampleRoutes");
-
-// !SETUP routes declaration
-app.use("/api/example", exampleRoutes);
 
 // Health check route
 app.get("/health", (_req, res) => {
@@ -38,16 +39,14 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// Chat routes
+app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/reports", reportRoutes);
 
-// Not Found Handler
 app.use((_req, _res, next) => {
   next(ApiError.notFound("Resource Not Found"));
 });
 
-// Global Error Handler
 app.use(errorMiddleware);
 
 module.exports = app;
