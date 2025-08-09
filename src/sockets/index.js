@@ -1,10 +1,20 @@
 const { Server } = require("socket.io");
 const { chatNamespace } = require("./namespaces/chat");
 
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",") ?? [
+  "http://localhost:3000",
+];
+
 function initSockets(server) {
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
       methods: ["GET", "POST"],
     },
     pingInterval: 20000,
