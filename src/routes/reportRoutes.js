@@ -10,22 +10,19 @@ const {
   assignOfficer,
   getReportByPublicKey,
   triggerAnalysisById,
+  getOfficerKeys,
 } = require("../controllers/reportController");
 
 router.post("/", createReport);
 router.get("/", authenticate, onlyAllow("OFFICER"), getAllReports);
-router.get("/:reportId", authenticate, onlyAllow("OFFICER"), getReportById);
+router.get("/officer-keys", authenticate, onlyAllow("OFFICER"), getOfficerKeys);
+router.post("/lookup", getReportByPublicKey);
+router.get("/:reportId", getReportById);
 router.put(
   "/:reportId/assign",
   authenticate,
   onlyAllow("OFFICER"),
   assignOfficer
-);
-router.post(
-  "/lookup",
-  authenticate,
-  onlyAllow("OFFICER"),
-  getReportByPublicKey
 );
 router.post("/:id/analyze", triggerAnalysisById);
 

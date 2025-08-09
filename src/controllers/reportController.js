@@ -86,21 +86,23 @@ const assignOfficer = async (req, res, next) => {
 
 // find a report by userPublicKey
 const getReportByPublicKey = async (req, res, next) => {
-  const { userPublicKey } = req.body;
-  if (!userPublicKey) {
-    return next(ApiError.badRequest("userPublicKey is required."));
+  const { key } = req.body;
+  if (!key) {
+    return next(ApiError.badRequest("key is required."));
   }
 
   try {
     const report = await prisma.report.findFirst({
-      where: { userPublicKey },
+      where: { user_public_key: key },
     });
 
     if (!report) {
-      return next(ApiError.notFound("Report not found for the given key."));
+      return next(ApiError.notFound("Laporan tidak ditemukan."));
     }
 
-    res.status(200).json(apiResponse({ data: { reportId: report.id } }));
+    res
+      .status(200)
+      .json(apiResponse({ data: { id: report.id, details: report.details } }));
   } catch (error) {
     next(error);
   }
@@ -130,6 +132,18 @@ const triggerAnalysisById = async (req, res, next) => {
   }
 };
 
+const getOfficerKeys = async (req, res, next) => {
+  return res.status(200).json(
+    apiResponse({
+      data: {
+        public_key: process.env.OFFICER_PUBLIC_KEY,
+        private_key: process.env.OFFICER_PRIVATE_KEY,
+      },
+      message: "Kunci publik petugas dan instance berhasil diambil.",
+    })
+  );
+};
+
 module.exports = {
   createReport,
   getAllReports,
@@ -137,4 +151,5 @@ module.exports = {
   assignOfficer,
   getReportByPublicKey,
   triggerAnalysisById,
+  getOfficerKeys,
 };
